@@ -1,0 +1,251 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+<meta content="en-us" http-equiv="Content-Language" />
+<meta content="Tweepsect is a tool for finding the intersection between the set of people who follow you and you follow. It also has an ASCII throbber." name="description" />
+
+<title>tweepsect | Tweeple intersected, stalkers exposed.</title>
+
+<script src="http://www.google.com/jsapi"></script>
+<script>
+    google.load("jquery", "1");
+    var remaining_hits = 999;
+    var confirmed_api = false;
+
+    /* A simple throbber, for the lols and bonus internets. */
+    function throbber() {
+	throbber.pos += 1;
+	if(throbber.pos > throbber.animation.length - 1) throbber.pos = 0;
+	return throbber.animation[throbber.pos];
+    }
+    throbber.pos = 0;
+    throbber.animation = "|/-\\";
+
+    /* Wrapper function for logging the progress. Utilizes the throbber. */
+    function log(msg) {
+        $("#progress").html("[" + throbber() +"] " + msg);
+    }
+    
+    /* We don't want to start messing around with things until jQuery etc is loaded. */
+    google.setOnLoadCallback(function() {
+	log("Welcome! Your browser will query the Twitter API directly, be prepared to authenticate.");
+	$("input").attr("disabled", false);
+    });
+
+    /* Fetch the current remaining_hits status for the user's Twitter API. */
+    function check_limit(success_callback) {
+	var api_target = "http://twitter.com/account/rate_limit_status.json?callback=?"
+	$.getJSON(api_target, function(data) {
+	    remaining_hits = data.remaining_hits;
+	    success_callback();
+	});
+    }
+
+    /* Confirmation message for when we're starting to get low on remaining hits. */
+    function confirm_api() {
+	if(remaining_hits<5) {
+	    log("Getting dangerously close to getting banned from Twitter. No more requests for a while, please.");
+	    return false;
+	}
+	confirmed_api = confirmed_api || confirm("Warning: Performing too many queries on the Twitter API could cause Twitter to block you temporarily. You have " + remaining_hits + " queries remaining for this hour, are you sure you want to continue?");
+	return confirmed_api;
+    }
+
+    function load_twitter(api_target, page, into, callback) {
+	remaining_hits -= 1;
+        $.getJSON(api_target + "?page=" + page + "&callback=?",
+            function(data){
+                log("Parsing results: Page " + page);
+                if(data.length==0) {
+		    log("Twitter returned an error: " + data.error);
+		    return;
+		}
+                $.each(data, function(i, item) { into.push(item.screen_name); });
+                if(data.length==100 && (remaining_hits > 30 || confirm_api())) {
+                    load_twitter(api_target, page+1, into, callback);
+                } else {
+                    if($.isFunction(callback)) callback();
+                }
+        });
+    }
+
+    function load_followers(username, page, into, callback) {
+        var api_target = "http://twitter.com/statuses/followers/" + username + ".json";
+	load_twitter(api_target, page, into, callback);
+    }
+
+    function load_following(username, page, into, callback) {
+        var api_target = "http://twitter.com/statuses/friends/" + username + ".json";
+	load_twitter(api_target, page, into, callback);
+    }
+
+    /* Calculate the set differences between the ``following`` and ``followers`
+       and shove them into the appropriate arrays. */
+    function load_diffs(following, followers, only_followers, only_following, mutual) {
+        $.each(following, function(i, item) {
+            if(!in_array(followers, item)) {
+                only_following.push(item);
+            } else {
+                mutual.push(item);
+            }
+        });
+
+        $.each(followers, function(i, item) {
+            if(!in_array(following, item)) {
+                only_followers.push(item);
+            }
+        });
+    }
+
+    /* Draw results */
+    function render(mutual, only_following, only_followers) {
+        $("#mutual").empty().append("<h2>Mutual <span class=\"number\">(" + mutual.length + ")</span></h2><ul></ul>");
+        $.each(mutual.sort(), function(i,item){
+            $("<li></li>").html($('<a href="http://twitter.com/'+item+'">'+item+'</a>')).appendTo("#mutual > ul");
+         });
+
+        $("#only_following").empty().append("<h2>Stalking <span class=\"number\">(" + only_following.length + ")</span></h2><ul></ul>");
+        $.each(only_following.sort(), function(i, item){
+            $("<li></li>").html($('<a href="http://twitter.com/'+item+'">'+item+'</a>')).appendTo("#only_following > ul");
+         });
+
+        $("#only_followers").empty().append("<h2>Stalkers <span class=\"number\">(" + only_followers.length + ")</span></h2><ul></ul>");
+        $.each(only_followers.sort(), function(i, item){
+            $("<li></li>").html($('<a href="http://twitter.com/'+item+'">'+item+'</a>')).appendTo("#only_followers > ul");
+         });
+
+    }
+
+    function get_results() {
+        var username = $("#username").attr("value");
+        var followers = new Array();
+        var following = new Array();
+        var only_followers = new Array();
+        var only_following = new Array();
+        var mutual = new Array();
+
+	log("Checking API query limits.");
+	check_limit(function() {
+	    log("Loading followers.");
+	    load_followers(username, 1, followers, function() {
+		log("Loading following.");
+		load_following(username, 1, following, function() {
+		    log("Calculating set differences...");
+		    load_diffs(following.sort(), followers.sort(), only_followers, only_following, mutual);
+		    log("Rendering...");
+		    render(mutual, only_following, only_followers);
+		    log("Done! Do another?");
+		});
+	    });
+	});
+    }
+</script>
+<script>
+    // Stolen libs...
+
+    // Based on:
+    //+ Carlos R. L. Rodrigues
+    //@ http://jsfromhell.com/array/search [rev. #2]
+    // Modified by Andrey Petrov for simplicity.
+    in_array = function(o, v){
+        var h = o.length, l = -1, m;
+        while(h - l > 1)
+            if(o[m = h + l >> 1] < v) l = m;
+            else h = m;
+        return o[h] == v;
+    };
+</script>
+<link rel="stylesheet" href="css/blueprint/screen.css" type="text/css" media="screen, projection">
+<link rel="stylesheet" href="css/blueprint/print.css" type="text/css" media="print"> 
+<!--[if IE]>
+  <link rel="stylesheet" href="css/blueprint/ie.css" type="text/css" media="screen, projection">
+<![endif]-->
+
+<style type="text/css">
+    html, body, #wrap {height: 100%;}
+    .blue {
+	color: #0084B4;
+    }
+    .red {
+	color: #FF493C;
+    }
+    .number {
+	color: #CCCCCC;
+    }
+    #results a {
+	text-decoration: none;
+    }
+    #results li {
+	color: #CCCCCC;
+    }
+    #progress {
+	font-family: monospace;
+	font-size: 14px;
+	line-height: 25px;
+	background: #FFFFCC;
+	padding: 0px 5px;
+    }
+    #header {
+	height: 100px;
+	padding-top: 15px;
+    }
+    #footer {
+	height: 4em;
+	text-align: center;
+	position: relative;
+	margin-top: -4em;
+	clear:both;
+    }
+    body > #wrap {
+	min-height: 100%;
+	height: auto !important;
+    }
+    #results {
+	padding-bottom: -4em;
+	padding-top: 1em;
+    }
+
+</style>
+
+</head>
+<body>
+
+<div id="wrap">
+
+<div id="header" class="container">
+    <div class="span-5">
+	<a href="."><h1 style="margin-top: 10px;"><span class="blue">tweep</span><span class="red">sect</span></h1></a>
+    </div>
+    <div id="twitterinfo" class="span-19 last">
+	<form onsubmit="get_results(); return false;"><label for="username">Username</label><br /><input id="username" type="text" disabled="true"> <input value="Enlighten Me" type="submit" disabled="true"></form>
+    </div>
+    <div id="progress" class="span-24 last">[|] Loading ...</div>
+</div>
+
+<div id="results" class="container">
+    <div class="span-8" id="mutual"></div>
+    <div class="span-8" id="only_following"></div>
+    <div class="span-8 last" id="only_followers"></div>
+</div>
+
+</div>
+
+<div id="footer">A weekend project by @<a href="http://twitter.com/shazow">shazow</a></div>
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-407051-1");
+pageTracker._trackPageview();
+} catch(err) {}
+</script>
+
+</body>
+</html>
+
