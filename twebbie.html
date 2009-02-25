@@ -5,7 +5,9 @@
     <title>Twebbie</title>
     <meta http-equiv="Content-Type" content="application/xhtml+xml; charset=utf-8" />
     <script type="text/javascript" src="js/jquery-1.3.2.min.js"></script>
+    <script type="text/javascript" src="js/jquery-ui-personalized-1.6rc6.min.js"></script>
     <script type="text/javascript" src="js/jquery.hotkeys-0.7.8-packed.js"></script>
+    <script type="text/javascript" src="js/utils.js"></script>
     <script type="text/javascript" src="js/twebbie.js"></script>
 </head>
 
@@ -14,7 +16,8 @@
     <div class="container">
         <div id="status"></div>
         <div class="tweets">
-            <ul id="tweet_main"></ul>
+            <ul id="tweet_main" style="background: #fee";></ul>
+            <ul id="tweet_second" style="background: #efe";></ul>
         </div>
     </div>
 
@@ -27,5 +30,11 @@
         </form>
     </div>
     -->
+
+    <script type="text/javascript">
+        var t = new Twitter();
+        t.register_group("All", $("#tweet_main"));
+        t.register_group("Second", $("#tweet_second"));
+    </script>
 </body>
 </html>
