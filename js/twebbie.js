@@ -24,8 +24,11 @@ TwitterGroup.prototype.remove_member = function(member_id) {
 }
 
 TwitterGroup.prototype.add_tweet = function(tweet) {
+    $("<li></li>").html($()).prependTo(this.target);
+    this.slots_left--;
 
-
+    if(this.slots_left>0) return;
+    $("li:last", this.target).remove();
 }
 
 TwitterGroup.prototype.add_tweet_maybe = function(tweet) {
