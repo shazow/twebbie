@@ -16,8 +16,8 @@
     <div class="container">
         <div id="status"></div>
         <div class="tweets">
-            <ul id="tweet_main" style="background: #fee";></ul>
-            <ul id="tweet_second" style="background: #efe";></ul>
+            <ul id="tweet_main" style="background: #fee";>Everything else</ul>
+            <ul id="tweet_second" style="background: #efe";>Nothing</ul>
         </div>
     </div>
 
@@ -33,8 +33,8 @@
 
     <script type="text/javascript">
         var t = new Twitter();
-        t.register_group("All", $("#tweet_main"));
-        t.register_group("Second", $("#tweet_second"));
+        t.register_group("All", $("#tweet_main"), false);
+        t.register_group("Second", $("#tweet_second"), {});
     </script>
 </body>
 </html>

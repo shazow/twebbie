@@ -5,13 +5,12 @@
  * transparently change the internal datastructure and not affect the outer
  * code.
  */
-function TwitterGroup(name, target) {
+function TwitterGroup(name, target, members) {
     this.name = name;
     this.target = target;
     this.member_count = 0;
-    this.whitelist = {};
-    this.blacklist = {};
-    this.slots_left = 100;
+    this.members = members;
+    this.slots_left = 5;
 }
 
 /* Given tweet data from the Twitter API, construct an <li> object which will display it. */
@@ -21,25 +20,34 @@ TwitterGroup.prototype.render_tweet = function(tweet) {
         <img class="profile_image" src="' + tweet.user.profile_image_url + '" alt="' + tweet.user.name + '" />\
         <span class="time" title="' + tweet.created_at + '">' + relative_time(tweet.created_at) + '</span>\
         <a class="user" href="javascript:addAddress(\'' + tweet.user.screen_name + '\')">' + tweet.user.screen_name + '</a>\
-        <div class="tweet_text">' + tweet.text.replace(/(\w+:\/\/[A-Za-z0-9-_]+\.[A-Za-z0-9-_:%&\?\/.=]+)/g, '<a href="$1">$1</a>').replace(/[\@]+([A-Za-z0-9-_]+)/g, '<a href="http://twitter.com/$1">@$1</a>').replace(/[&lt;]+[3]/g, "<tt class='heart'>&#x2665;</tt>") + '</div></li>').draggable({ delay: 250 });
+        <div class="tweet_text">' + tweet.text.replace(/(\w+:\/\/[A-Za-z0-9-_]+\.[A-Za-z0-9-_:%&\?\/.=]+)/g, '<a href="$1">$1</a>').replace(/[\@]+([A-Za-z0-9-_]+)/g, '<a href="http://twitter.com/$1">@$1</a>').replace(/[&lt;]+[3]/g, "<tt class='heart'>&#x2665;</tt>") + '</div></li>')
+
+    $(tweet_obj).draggable({ delay: 100, revert: 'invalid' });
+
     tweet_obj[0].member_id = tweet.user.id;
     tweet_obj[0].tweet_id = tweet.id;
     tweet_obj[0].group = this;
     tweet_obj[0].data = tweet;
+
     return tweet_obj;
 }
 
 TwitterGroup.prototype.is_member = function(member_id) {
-    return this.whitelist[member_id];
+    if(this.members === false) return true;
+    return this.members[member_id];
 }
 
 TwitterGroup.prototype.add_member = function(member_id, tweets) {
-    if(this.whitelist[member_id]) return; // Already there
+    if(this.members[member_id]) {
+        console.log("Member already exists in this group, discarding.");
+        return; // Already there
+    }
 
-    this.whitelist[member_id] = true;
+    if(!this.members) this.members = {};
+    this.members[member_id] = true;
 
     /// TODO: Should this be part of this.add_tweet?
-    // Convert tweets into list items and insert them into the appropriate positions in the timeline for this group.
+    // Transplant the tweets list items into the appropriate positions in the timeline for this group.
     var tweet_idx = 0;
 
     // Assume the tweets are in descending sorted order
@@ -48,9 +56,10 @@ TwitterGroup.prototype.add_member = function(member_id, tweets) {
         var t = existing_tweets[i];
         var cur_tweet = tweets[tweet_idx];
 
-        if(t.tweet_id < cur_tweet.id) {
+        if(t.tweet_id < cur_tweet.tweet_id) {
             // Insert before it, and move on to the next one
-            this.render_tweet(cur_tweet).insertBefore(t);
+            cur_tweet.group = this;
+            $(cur_tweet).insertBefore(t);
 
             tweet_idx++;
             this.slots_left--; /// NOTE: Technically, we should be clearing for extra slots, but we'll be lazy for now and let add_tweet do it next time.
@@ -62,18 +71,16 @@ TwitterGroup.prototype.add_member = function(member_id, tweets) {
     // Fill the rest at the end
     for(var i=tweet_idx; i < tweet_idx.length; i++) {
         var cur_tweet = tweets[i];
-        $(this.target).append(this.render_tweet(cur_tweet));
+        $(this.target).append(cur_tweet);
     }
-
 
 }
 
 TwitterGroup.prototype.remove_member = function(member_id) {
-    this.whitelist[member_id] = false;
+    if(this.members) this.members[member_id] = false;
 
     // Remove all items from this.target which are owned by member_id and return their data in a list.
-    var tweet_items = $("li", this.target).filter(function(i) { return this.member_id == member_id; }).remove();
-    return $.map(tweet_items, function(tweet) { return tweet.data; });
+    return $("li", this.target).filter(function(i) { return this.member_id == member_id; });
 
 }
 
@@ -90,7 +97,7 @@ TwitterGroup.prototype.add_tweet = function(tweet) {
 
 TwitterGroup.prototype.add_tweet_maybe = function(tweet) {
     var member_id = tweet.user.id;
-    if(!this.member_count || this.is_member(member_id)) this.add_tweet(tweet);
+    if(this.member_count === false || this.is_member(member_id)) this.add_tweet(tweet);
 }
 
 /* Abstraction for a user's Twitter account. */
@@ -100,8 +107,8 @@ function Twitter(base_target) {
     this.last_id = false;
 }
 
-Twitter.prototype.register_group = function(name, target) {
-    var group = new TwitterGroup(name, target);
+Twitter.prototype.register_group = function(name, target, members) {
+    var group = new TwitterGroup(name, target, members);
     this.groups.push(group);
 
     /* Allow dragging between groups to add/remove members. */
