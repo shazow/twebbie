@@ -10,7 +10,7 @@ function TwitterGroup(name, target, members) {
     this.target = target;
     this.member_count = 0;
     this.members = members;
-    this.slots_left = 5;
+    this.slots_left = 10;
 }
 
 /* Given tweet data from the Twitter API, construct an <li> object which will display it. */
@@ -80,7 +80,7 @@ TwitterGroup.prototype.remove_member = function(member_id) {
     if(this.members) this.members[member_id] = false;
 
     // Remove all items from this.target which are owned by member_id and return their data in a list.
-    return $("li", this.target).filter(function(i) { return this.member_id == member_id; });
+    return $("li", this.target).filter(function(i) { return this.member_id == member_id; }).remove();
 
 }
 
@@ -95,6 +95,7 @@ TwitterGroup.prototype.add_tweet = function(tweet) {
     }
 }
 
+/* Check if a tweet belongs in this group, add it if it does. */
 TwitterGroup.prototype.add_tweet_maybe = function(tweet) {
     var member_id = tweet.user.id;
     if(this.member_count === false || this.is_member(member_id)) this.add_tweet(tweet);
