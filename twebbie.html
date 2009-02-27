@@ -10,8 +10,12 @@
     <script type="text/javascript" src="js/utils.js"></script>
     <script type="text/javascript" src="js/twebbie.js"></script>
     <style type="text/css">
-        ul.tweet_group { list-style-type: none; }
-        .tweet_container { border: 1px solid; margin: 5px; padding: 5px; width: 300px; background-color: #eee; }
+        h2 { margin: 0 0 0 0; }
+        .tweet_group { border: 1px solid; margin: 5px; padding: 5px; float: left; }
+        ul.tweet_group_list { margin: 0 0 0 0; padding-left: 0em; list-style-type: none; }
+        ul#tweet_main { background-color: #fee }
+        ul#tweet_second { background-color: #efe }
+        .tweet_container { border: 1px solid; margin-bottom: 5px; padding: 5px; width: 300px; background-color: #eee; }
         .tweet_profile_image { margin-right: 5px; margin-bottom: 5px; float: left; }
         .tweet_text { }
         .tweet_metadata { clear: both; font-size: 80%; }
@@ -19,13 +23,20 @@
 </head>
 
 <body> 
+    <div id="client_status"></div>
 
-    <div class="container">
-        <div id="status"></div>
-        <div class="tweets">
-            <ul id="tweet_main" class="tweet_group" style="background: #fee";><h1>Everything else</h1></ul>
-            <ul id="tweet_second" class="tweet_group" style="background: #efe";><h1>Nothing</h1></ul>
+    <div class="groups_container">
+
+        <div class="tweet_group">
+            <h2>All Friends</h2>
+            <ul id="group_main" class="tweet_group_list"></ul>
         </div>
+
+        <div class="tweet_group">
+            <h2>My Custom Group</h2>
+            <ul id="group_two" class="tweet_group_list"></ul>
+        </div>
+
     </div>
 
     <!--
@@ -40,8 +51,8 @@
 
     <script type="text/javascript">
         var t = new Twitter();
-        t.register_group("All", $("#tweet_main"), false);
-        t.register_group("Second", $("#tweet_second"), {});
+        t.register_group("All", $("#group_main"), false);
+        t.register_group("Second", $("#group_two"), {});
         t.refresh();
     </script>
 </body>
