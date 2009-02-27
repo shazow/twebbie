@@ -25,6 +25,7 @@ TwitterGroup.prototype.render_tweet = function(tweet) {
               ' + tweet.text.
               replace(/(\w+:\/\/[A-Za-z0-9-_]+\.[A-Za-z0-9-_:%&\?\/.=]+)/g, '<a href="$1">$1</a>').
               replace(/[\@]+([A-Za-z0-9-_]+)/g, '<a href="http://twitter.com/$1">@$1</a>').
+              replace(/[\#]+([A-Za-z0-9-_]+)/g, '<a href="http://search.twitter.com/search?q=$1">#$1</a>').
               replace(/[&lt;]+[3]/g, "<tt class='heart'>&#x2665;</tt>") + '\
           </div>\
           <div class="tweet_metadata">\
