@@ -35,7 +35,7 @@ TwitterGroup.prototype.render_tweet = function(tweet) {
       </li>\
     ')
 
-    $(tweet_obj).draggable({ delay: 100, revert: 'invalid' });
+    $(tweet_obj).draggable({ delay: 100, revert: 'invalid', opacity: 0.5, zIndex: 1 });
 
     tweet_obj[0].member_id = tweet.user.id;
     tweet_obj[0].tweet_id = tweet.id;
