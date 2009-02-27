@@ -16,11 +16,24 @@ function TwitterGroup(name, target, members) {
 /* Given tweet data from the Twitter API, construct an <li> object which will display it. */
 TwitterGroup.prototype.render_tweet = function(tweet) {
     /* Inspired by http://github.com/peterk/twoot */
-    var tweet_obj = $('<li>\
-        <img class="profile_image" src="' + tweet.user.profile_image_url + '" alt="' + tweet.user.name + '" />\
-        <span class="time" title="' + tweet.created_at + '">' + relative_time(tweet.created_at) + '</span>\
-        <a class="user" href="javascript:addAddress(\'' + tweet.user.screen_name + '\')">' + tweet.user.screen_name + '</a>\
-        <div class="tweet_text">' + tweet.text.replace(/(\w+:\/\/[A-Za-z0-9-_]+\.[A-Za-z0-9-_:%&\?\/.=]+)/g, '<a href="$1">$1</a>').replace(/[\@]+([A-Za-z0-9-_]+)/g, '<a href="http://twitter.com/$1">@$1</a>').replace(/[&lt;]+[3]/g, "<tt class='heart'>&#x2665;</tt>") + '</div></li>')
+    var tweet_obj = $('\
+      <li class="tweet_container">\
+          <div class="tweet_profile_image">\
+              <img class="profile_image" src="' + tweet.user.profile_image_url + '" alt="' + tweet.user.name + '" />\
+          </div>\
+          <div class="tweet_text">\
+              ' + tweet.text.
+              replace(/(\w+:\/\/[A-Za-z0-9-_]+\.[A-Za-z0-9-_:%&\?\/.=]+)/g, '<a href="$1">$1</a>').
+              replace(/[\@]+([A-Za-z0-9-_]+)/g, '<a href="http://twitter.com/$1">@$1</a>').
+              replace(/[&lt;]+[3]/g, "<tt class='heart'>&#x2665;</tt>") + '\
+          </div>\
+          <div class="tweet_metadata">\
+              <a class="user" href="javascript:addAddress(\'' + tweet.user.screen_name + '\')">' + tweet.user.screen_name + '</a>\
+              <span class="time" title="' + tweet.created_at + '">' + relative_time(tweet.created_at) + '</span>\
+              via ' + tweet.source + '\
+          </div>\
+      </li>\
+    ')
 
     $(tweet_obj).draggable({ delay: 100, revert: 'invalid' });
 
