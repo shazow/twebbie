@@ -1,3 +1,6 @@
+/// TODO: Update code terminology to correspond to the new docs on the wiki. 
+///       Such as, Group -> Filter
+/// TODO: Add an abstraction class for Columns (as opposed to Filters)
 
 /* 
  * Abstraction for a TwitterGroup - a subset of a user's Twitter account. 
