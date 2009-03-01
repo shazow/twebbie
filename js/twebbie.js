@@ -10,7 +10,7 @@ function TwitterGroup(name, target, members) {
     this.target = target;
     this.member_count = 0;
     this.members = members;
-    this.slots_left = 10;
+    this.slots_left = 20;
 }
 
 /* Given tweet data from the Twitter API, construct an <li> object which will display it. */
@@ -53,7 +53,6 @@ TwitterGroup.prototype.is_member = function(member_id) {
 
 TwitterGroup.prototype.add_member = function(member_id, tweets) {
     if(this.members[member_id]) {
-        console.log("Member already exists in this group, discarding.");
         return; // Already there
     }
 
@@ -65,7 +64,7 @@ TwitterGroup.prototype.add_member = function(member_id, tweets) {
     var tweet_idx = 0;
 
     // Assume the tweets are in descending sorted order
-    var existing_tweets = $("li", this);
+    var existing_tweets = $("li", this.target);
     for(var i=0; i < existing_tweets.length; i++) {
         var t = existing_tweets[i];
         var cur_tweet = tweets[tweet_idx];
@@ -83,9 +82,8 @@ TwitterGroup.prototype.add_member = function(member_id, tweets) {
     }
 
     // Fill the rest at the end
-    for(var i=tweet_idx; i < tweet_idx.length; i++) {
-        var cur_tweet = tweets[i];
-        $(this.target).append(cur_tweet);
+    for(var i=tweet_idx; i < tweets.length; i++) {
+        $(this.target).append(tweets[i]);
     }
 
 }
@@ -94,7 +92,7 @@ TwitterGroup.prototype.remove_member = function(member_id) {
     if(this.members) this.members[member_id] = false;
 
     // Remove all items from this.target which are owned by member_id and return their data in a list.
-    return $("li", this.target).filter(function(i) { return this.member_id == member_id; }).remove();
+    return $("li", this.target).filter(function(i) { return this.member_id == member_id; });
 
 }
 
@@ -130,11 +128,10 @@ Twitter.prototype.register_group = function(name, target, members) {
     $(target).droppable({
         drop:   function(event, ui) { 
                     var tweet = ui.draggable[0];
+                    $(ui.draggable).attr("style", "position: relative"); // Snap back. Is there a better way to do this?
                     if(tweet.group == group) {
-                        $(ui.draggable).attr("style", "position: relative"); // Snap back. Is there a better way to do this?
                         return;
                     }
-                    console.log("Added member " + tweet.member_id + " to group " + group.name); 
                     var member_tweets = tweet.group.remove_member(tweet.member_id);
                     group.add_member(tweet.member_id, member_tweets);
                 }
@@ -148,7 +145,6 @@ Twitter.prototype.refresh = function() {
 
     var self = this;
 
-    console.log("Fetching: " + target_url);
     $.getJSON(target_url, function(data) {
         /// TODO: Optimize?
         $.each(data.reverse(), function(i, tweet) {
