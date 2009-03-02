@@ -194,7 +194,7 @@ Twitter.prototype.register_group = function(name, target, members) {
 /* Inspired by http://github.com/peterk/twoot */
 Twitter.prototype.refresh = function() {
     var target_url = "http://twitter.com/statuses/friends_timeline.json?callback=?";
-    if(this.last_update) target_url += "&since=" + this.last_update;
+    if(this.last_update) target_url += "&since=" + this.last_update.toGMTString();
 
     var self = this;
 
@@ -210,5 +210,8 @@ Twitter.prototype.refresh = function() {
         });
     });
 
-    this.last_update = new Date().toGMTString();
+    this.last_update = new Date();
+
+    $("#client_status").append("Last updated @ " + this.last_update.getHours() + ":" + this.last_update.getMinutes());
+ 
 }
