@@ -21,6 +21,11 @@
         .tweet_profile_image { margin-right: 5px; margin-bottom: 5px; float: left; }
         .tweet_text { font-size: .8em; margin-bottom: 5px; }
         .tweet_metadata { font-size: .7em; clear: both; }
+
+        .mutual { color: #faa; }
+        .stalker { color: #afa; }
+        .stalking { color: #aaf; }
+
     </style>
 </head>
 
@@ -52,10 +57,8 @@
     -->
 
     <script type="text/javascript">
-        var t = new Twitter();
-        t.register_group("All", $("#group_main"), false);
+        var t = new Twitter($("#group_main"));
         t.register_group("Second", $("#group_two"), {});
-        t.refresh();
     </script>
 </body>
 </html>

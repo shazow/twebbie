@@ -8,7 +8,8 @@
  * transparently change the internal datastructure and not affect the outer
  * code.
  */
-function TwitterGroup(name, target, members) {
+function TwitterGroup(name, target, members, account) {
+    this.account = account;
     this.name = name;
     this.target = target;
     this.member_count = 0;
@@ -18,6 +19,8 @@ function TwitterGroup(name, target, members) {
 
 /* Given tweet data from the Twitter API, construct an <li> object which will display it. */
 TwitterGroup.prototype.render_tweet = function(tweet) {
+    var relationship = this.account.get_relationship(tweet.user.id);
+
     /* Inspired by http://github.com/peterk/twoot */
     var tweet_obj = $('\
       <li class="tweet_container">\
@@ -32,7 +35,7 @@ TwitterGroup.prototype.render_tweet = function(tweet) {
               replace(/[&lt;]+[3]/g, "<tt class='heart'>&#x2665;</tt>") + '\
           </div>\
           <div class="tweet_metadata">\
-              <a class="user" href="javascript:addAddress(\'' + tweet.user.screen_name + '\')">' + tweet.user.screen_name + '</a>\
+              <a class="user ' + relationship + '" href="http://twitter.com/' + tweet.user.screen_name + '">' + tweet.user.screen_name + '</a>\
               <span class="time" title="' + tweet.created_at + '">' + relative_time(tweet.created_at) + '</span>\
               via ' + tweet.source + '\
           </div>\
@@ -121,10 +124,57 @@ function Twitter(base_target) {
     this.groups = new Array();
     this.last_update = false;
     this.last_id = false;
+    this.register_group("All", base_target, false);
+
+    // Load social graph data
+    this.followers = {};
+    this.following = {};
+
+    var self = this;
+    this.load_social_graph(function() {
+        self.refresh();
+    });
+}
+
+Twitter.prototype.load_social_graph = function(callback) {
+    /// NOTE: Social graph stuff does not work right now due to a bug:
+    /// http://code.google.com/p/twitter-api/issues/detail?id=318
+    callback(); return;
+    /// Delete the above if the bug is fixed...
+
+    var self = this;
+    // Load following
+    $.getJSON("http://twitter.com/friends/ids.json?callback=?", function(data) {
+        foo = data;
+        $.each(data, function(i, member_id) {
+            self.following[member_id] = true;
+        });
+
+        // Load followers
+        $.getJSON("http://twitter.com/followers/ids.json?callback=?", function(data) {
+            $.each(data, function(i, member_id) {
+                self.followers[member_id] = true;
+            });
+
+            // Run callback
+            callback();
+        });
+    });
+}
+
+Twitter.prototype.get_relationship = function(member_id) {
+    if(this.followers[member_id]) {
+        if(this.following[member_id]) return "mutual";
+        return "stalker";
+    } else if(this.following[member_id]) {
+        return "stalking";
+    } else {
+        return "stranger";
+    }
 }
 
 Twitter.prototype.register_group = function(name, target, members) {
-    var group = new TwitterGroup(name, target, members);
+    var group = new TwitterGroup(name, target, members, this);
     this.groups.push(group);
 
     /* Allow dragging between groups to add/remove members. */
