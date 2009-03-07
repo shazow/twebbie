@@ -137,11 +137,6 @@ function Twitter(base_target) {
 }
 
 Twitter.prototype.load_social_graph = function(callback) {
-    /// NOTE: Social graph stuff does not work right now due to a bug:
-    /// http://code.google.com/p/twitter-api/issues/detail?id=318
-    callback(); return;
-    /// Delete the above if the bug is fixed...
-
     var self = this;
     // Load following
     $.getJSON("http://twitter.com/friends/ids.json?callback=?", function(data) {

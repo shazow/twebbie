@@ -14,20 +14,24 @@
         h2 { margin: 0 0 5px 0; }
 
         #client_status { font-size: .7em; border: 1px solid; margin: 5px; padding: 5px; clear: both; }
-        .tweet_group { border: 1px solid; margin: 5px; padding: 5px; float: left; }
+        .tweet_group { background: #bbb; border: 1px solid; margin: 5px; padding: 5px; float: left; }
         ul.tweet_group_list { margin: 0 0 0 0; padding-left: 0em; padding-bottom: 50px; width: 310px; list-style-type: none; }
         ul#tweet_main { background-color: #fee }
         ul#tweet_second { background-color: #efe }
 
-        .tweet_container { border: 1px solid; margin-bottom: 5px; padding: 5px; width: 300px; background-color: #eee; }
+        .tweet_container { 
+            border: 1px solid; margin-bottom: 5px; padding: 5px; width: 300px;
+            background: #cbbdae url(images/tweet_gradient.gif) repeat-x top;
+        }
         .tweet_container:last-child { margin-bottom: 0px; }
         .tweet_profile_image { margin-right: 5px; margin-bottom: 5px; float: left; }
         .tweet_text { font-size: .8em; margin-bottom: 5px; }
         .tweet_metadata { font-size: .7em; clear: both; }
+        .tweet_metadata a { text-decoration: none; color: #ea9f13; }
 
-        .mutual { color: #faa; }
-        .stalker { color: #afa; }
-        .stalking { color: #aaf; }
+        .mutual:before { content: "\2194 "; color: #5a9207; font-weight: bold; }
+        .stalker:before { content: "\2190 "; color: #b31c08; font-weight: bold; }
+        .stalking:before { content: "\2192 "; color: #b30855; font-weight: bold; }
 
     </style>
 </head>
