@@ -23,23 +23,25 @@ TwitterGroup.prototype.render_tweet = function(tweet) {
 
     /* Inspired by http://github.com/peterk/twoot */
     var tweet_obj = $('\
-      <li class="tweet_container">\
-          <div class="tweet_profile_image">\
-              <img class="profile_image" src="' + tweet.user.profile_image_url + '" alt="' + tweet.user.name + '" />\
-          </div>\
-          <div class="tweet_text">\
-              ' + tweet.text.
-              replace(/(\w+:\/\/[A-Za-z0-9-_]+\.[A-Za-z0-9-_:%&\?\/.=]+)/g, '<a href="$1">$1</a>').
-              replace(/[\@]+([A-Za-z0-9-_]+)/g, '<a href="http://twitter.com/$1">@$1</a>').
-              replace(/[\#]+([A-Za-z0-9-_]+)/g, '<a href="http://search.twitter.com/search?q=$1">#$1</a>').
-              replace(/[&lt;]+[3]/g, "<tt class='heart'>&#x2665;</tt>") + '\
-          </div>\
-          <div class="tweet_metadata">\
-              <a class="user ' + relationship + '" href="http://twitter.com/' + tweet.user.screen_name + '">' + tweet.user.screen_name + '</a>\
-              <span class="time" title="' + tweet.created_at + '">' + relative_time(tweet.created_at) + '</span>\
-              via ' + tweet.source + '\
-          </div>\
-      </li>\
+        <li class="tweet_container ui-widget ui-widget-content ui-corner-all">\
+            <div class="container">\
+                <div class="tweet_profile_image">\
+                    <img class="profile_image" src="' + tweet.user.profile_image_url + '" alt="' + tweet.user.name + '" />\
+                </div>\
+                <div class="tweet_text">\
+                    ' + tweet.text.
+                    replace(/(\w+:\/\/[A-Za-z0-9-_]+\.[A-Za-z0-9-_:%&\?\/.=]+)/g, '<a href="$1">$1</a>').
+                    replace(/[\@]+([A-Za-z0-9-_]+)/g, '<a href="http://twitter.com/$1">@$1</a>').
+                    replace(/[\#]+([A-Za-z0-9-_]+)/g, '<a href="http://search.twitter.com/search?q=$1">#$1</a>').
+                    replace(/[&lt;]+[3]/g, "<tt class='heart'>&#x2665;</tt>") + '\
+                </div>\
+            </div>\
+            <div class="tweet_metadata">\
+                <span class="ui-icon tweep_relationship ' + relationship + '" title="' + relationship + '"></span><a href="http://twitter.com/' + tweet.user.screen_name + '">' + tweet.user.screen_name + '</a>\
+                <span class="time" title="' + tweet.created_at + '">' + relative_time(tweet.created_at) + '</span>\
+                via ' + tweet.source + '\
+            </div>\
+        </li>\
     ')
 
     $(tweet_obj).draggable({ delay: 100, revert: 'invalid', opacity: 0.5, zIndex: 1 });
