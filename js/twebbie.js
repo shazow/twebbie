@@ -120,11 +120,16 @@ TwitterGroup.prototype.add_tweet_maybe = function(tweet) {
 }
 
 /* Abstraction for a user's Twitter account. */
-function Twitter(base_target) {
+function Twitter() {
     this.groups = new Array();
     this.last_update = false;
     this.last_id = false;
-    this.register_group("All", base_target, false);
+
+    // Register the immutable "All Friends" group
+    this.register_group("All Friends", $("#all_friends"), false);
+
+    // Register a second group for fun
+    this.register_group("My Custom Group", $("#my_custom_group"), {});
 
     // Load social graph data
     this.followers = {};

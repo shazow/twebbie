@@ -37,16 +37,16 @@
 <body> 
     <div id="client_status"></div>
 
-    <div class="groups_container">
+    <div id="groups_container">
 
         <div class="tweet_group">
             <h2>All Friends</h2>
-            <ul id="group_main" class="tweet_group_list"></ul>
+            <ul id="all_friends" class="tweet_group_list"></ul>
         </div>
 
         <div class="tweet_group">
             <h2>My Custom Group</h2>
-            <ul id="group_two" class="tweet_group_list"></ul>
+            <ul id="my_custom_group" class="tweet_group_list"></ul>
         </div>
 
     </div>
@@ -62,8 +62,7 @@
     -->
 
     <script type="text/javascript">
-        var t = new Twitter($("#group_main"));
-        t.register_group("Second", $("#group_two"), {});
+        var t = new Twitter();
     </script>
 </body>
 </html>
