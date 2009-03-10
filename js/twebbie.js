@@ -206,7 +206,7 @@ Twitter.prototype.refresh = function() {
     });
 
     this.last_update = new Date();
-
-    $("#client_status").append("Last updated @ " + this.last_update.getHours() + ":" + this.last_update.getMinutes());
+    zeroPadding = (this.last_update.getMinutes() < 10) ? "0" : "";
+    $("#client_status").append("Last updated @ " + this.last_update.getHours() + ":" + zeroPadding + this.last_update.getMinutes());
  
 }
