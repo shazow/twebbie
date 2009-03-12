@@ -36,7 +36,7 @@ TwitterGroup.prototype.render_tweet = function(tweet) {
           </div>\
           <div class="tweet_metadata">\
               <a class="user ' + relationship + '" href="http://twitter.com/' + tweet.user.screen_name + '">' + tweet.user.screen_name + '</a>\
-              <span class="time" title="' + tweet.created_at + '">' + relative_time(tweet.created_at) + '</span>\
+              <a href="http://twitter.com/' + tweet.user.screen_name + '/status/' + tweet.id + '" class="time" title="' + tweet.created_at + '">' + relative_time(tweet.created_at) + '</a>\
               via ' + tweet.source + '\
           </div>\
       </li>\
