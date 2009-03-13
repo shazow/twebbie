@@ -25,7 +25,7 @@ TwitterGroup.prototype.render_tweet = function(tweet) {
     var tweet_obj = $('\
       <li class="tweet_container">\
           <div class="tweet_profile_image">\
-              <img class="profile_image" src="' + tweet.user.profile_image_url + '" alt="' + tweet.user.name + '" />\
+              <img class="profile_image" src="' + tweet.user.profile_image_url + '" alt="' + tweet.user.name + '" title="' + tweet.user.name + ' (' + tweet.user.screen_name + ')"/>\
           </div>\
           <div class="tweet_text">\
               ' + tweet.text.
