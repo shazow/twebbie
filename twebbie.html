@@ -68,6 +68,21 @@
 
     <script type="text/javascript">
         var t = new Twitter();
+
+        /* Refreshing the Twitter API */
+        function refresh_twitter_loop() {
+            t.refresh();
+            setTimeout("refresh_twitter_loop()", 90000);
+        }
+        setTimeout("refresh_twitter_loop()", 90000);
+
+        /* Refreshing the relative time */
+        function refresh_time_loop() {
+            refresh_time();
+            setTimeout("refresh_time_loop()", 30000);
+        }
+        setTimeout("refresh_time_loop()", 30000);
+
     </script>
 </body>
 </html>

@@ -124,6 +124,7 @@ function Twitter() {
     this.groups = new Array();
     this.last_update = false;
     this.last_id = false;
+    this.max_refresh_rate = 90; // Seconds
 
     // Register the immutable "All Friends" group
     this.register_group("Twebbie", $("#group-1"), false);
@@ -193,8 +194,10 @@ Twitter.prototype.register_group = function(name, target, members) {
 
 /* Inspired by http://github.com/peterk/twoot */
 Twitter.prototype.refresh = function() {
+    if (this.seconds_since_updated() < 90) return;
+
     var target_url = "http://twitter.com/statuses/friends_timeline.json?callback=?";
-    if(this.last_update) target_url += "&since=" + this.last_update.toGMTString();
+    if (this.last_update) target_url += "&since=" + this.last_update.toGMTString();
 
     var self = this;
 
@@ -213,5 +216,9 @@ Twitter.prototype.refresh = function() {
     this.last_update = new Date();
     zeroPadding = (this.last_update.getMinutes() < 10) ? "0" : "";
     $("#client_status").append("Last updated @ " + this.last_update.getHours() + ":" + zeroPadding + this.last_update.getMinutes());
- 
+}
+
+Twitter.prototype.seconds_since_updated = function() {
+    var now = new Date();
+    return (now - this.last_update)/1000;
 }

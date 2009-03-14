@@ -10,6 +10,13 @@ search = function(o, v, i){
     return o[h] != v ? i ? h : -1 : h;
 };
 
+/* Borrowed from http://github.com/peterk/twoot/ */
+function refresh_time() {
+    // get all span.time and recalc from title attribute
+    $('span.time').each(function() {
+        $(this).text(relative_time($(this).attr("title")));
+    })
+}
 
 /* Borrowed from http://github.com/seaofclouds/tweet/ */
 function relative_time(time_value) {
