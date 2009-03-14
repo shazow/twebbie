@@ -215,7 +215,7 @@ Twitter.prototype.refresh = function() {
 
     this.last_update = new Date();
     zeroPadding = (this.last_update.getMinutes() < 10) ? "0" : "";
-    $("#client_status").append("Last updated @ " + this.last_update.getHours() + ":" + zeroPadding + this.last_update.getMinutes());
+    $("#client_status").html("Last updated @ " + this.last_update.getHours() + ":" + zeroPadding + this.last_update.getMinutes());
 }
 
 Twitter.prototype.seconds_since_updated = function() {
