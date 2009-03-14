@@ -23,7 +23,7 @@ TwitterGroup.prototype.render_tweet = function(tweet) {
 
     /* Inspired by http://github.com/peterk/twoot */
     var tweet_obj = $('\
-      <li class="tweet_container">\
+      <li class="tweet_container ui-widget ui-widget-content ui-corner-all">\
           <div class="tweet_profile_image">\
               <img class="profile_image" src="' + tweet.user.profile_image_url + '" alt="' + tweet.user.name + '" title="' + tweet.user.name + ' (' + tweet.user.screen_name + ')"/>\
           </div>\
@@ -35,7 +35,7 @@ TwitterGroup.prototype.render_tweet = function(tweet) {
               replace(/[&lt;]+[3]/g, "<tt class='heart'>&#x2665;</tt>") + '\
           </div>\
           <div class="tweet_metadata">\
-              <a class="user ' + relationship + '" href="http://twitter.com/' + tweet.user.screen_name + '">' + tweet.user.screen_name + '</a>\
+              <span class="ui-icon tweep_relationship ' + relationship + '" title="' + relationship + '"></span><a href="http://twitter.com/' + tweet.user.screen_name + '">' + tweet.user.screen_name + '</a>\
               <a href="http://twitter.com/' + tweet.user.screen_name + '/status/' + tweet.id + '" class="time" title="' + tweet.created_at + '">' + relative_time(tweet.created_at) + '</a>\
               via ' + tweet.source + '\
           </div>\
@@ -126,10 +126,10 @@ function Twitter() {
     this.last_id = false;
 
     // Register the immutable "All Friends" group
-    this.register_group("All Friends", $("#all_friends"), false);
+    this.register_group("Twebbie", $("#group-1"), false);
 
     // Register a second group for fun
-    this.register_group("My Custom Group", $("#my_custom_group"), {});
+    this.register_group("New Group", $("#group-2"), {});
 
     // Load social graph data
     this.followers = {};
