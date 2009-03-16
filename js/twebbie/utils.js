@@ -39,3 +39,11 @@ function relative_time(time_value) {
     return (parseInt(delta / 86400)).toString() + ' days ago';
     }
 }
+
+
+function log(msg) {
+    var now = new Date();
+    var zero_padding = (now.last_update.getMinutes() < 10) ? "0" : "";
+    var time = this.last_update.getHours() + ":" + zeroPadding + this.last_update.getMinutes();
+    $("#client_status").html('<span class="time">' + time + '</span> ' + msg);
+}
