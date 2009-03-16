@@ -13,7 +13,7 @@ function WhitelistFilter(name) {
     this.members = {};
 
     this.slots_left = 200;
-    this.container = $('<ul id="' + name + '-filter" />');
+    this.container = $('<ul id="' + name + '-filter" class="twebbie-filter" />');
 }
 
 WhitelistFilter.prototype.is_member = function(member_id) {
