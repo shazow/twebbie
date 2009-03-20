@@ -32,8 +32,13 @@ function TwitterAccount() {
     });
 }
 
+TwitterAccount.prototype.seconds_since_refresh = function() {
+    var now = new Date();
+    return (now - this.last_update)/1000;
+}
+
 TwitterAccount.prototype.refresh = function() {
-    if (this.seconds_since_updated() < this.max_refresh_rate) return;
+    if (this.seconds_since_refresh() < this.max_refresh_rate) return;
 
     var target_url = "http://twitter.com/statuses/friends_timeline.json?callback=?";
     if (this.last_update) target_url += "&since=" + this.last_update.toGMTString();
@@ -83,7 +88,19 @@ TwitterAccount.prototype.load_social_graph = function(callback) {
     });
 }
 
+TwitterAccount.prototype.get_relationship = function(member_id) {
+    if(this.followers[member_id]) {
+        if(this.following[member_id]) return "mutual";
+        return "stalker";
+    } else if(this.following[member_id]) {
+        return "stalking";
+    } else {
+        return "stranger";
+    }
+}
+
 TwitterAccount.prototype.render_msg = function(tweet) {
+    /// TODO: Abstract tweets in a self-rendering object instead of this...
     var relationship = this.get_relationship(tweet.user.id);
 
     /* Inspired by http://github.com/peterk/twoot */

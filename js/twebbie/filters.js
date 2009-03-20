@@ -1,29 +1,54 @@
 /* filters.js - Twebbie message filters. */
 
 /* Interface for a TwebbieFilter */
-function TwebbieFilter() {}
-TwebbieSource.prototype = {
-    is_member: function()
+function TwebbieFilter(name, source) {}
+TwebbieFilter.prototype = {
+    passes_filter: function() {}
 }
 
 /*********************************************************************/
 
-function WhitelistFilter(name) {
+function WhitelistFilter(name, source) {
     this.name = name;
-    this.members = {};
-
-    this.slots_left = 200;
-    this.container = $('<ul id="' + name + '-filter" class="twebbie-filter" />');
+    this.source = source;
+    this.__init__();
 }
 
-WhitelistFilter.prototype.is_member = function(member_id) {
+WhitelistFilter.prototype.__init__ = function() {
+    var self = this;
+
+    this.members = {};
+    this.slots_left = 200;
+    this.container = $('<ul id="filter_id-' + name + '" class="twebbie-filter" />');
+    this.container[0].filter = self;
+
+    this.container.droppable({
+        drop:   function(event, ui) { 
+        /// TODO: This wont actually work for WhitelistFilter, only BlacklistFilter. FIXME
+                    var tweet = ui.draggable[0];
+                    $(ui.draggable).attr("style", "position: relative"); // Snap back. Is there a better way to do this?
+
+                    var parent_filter = tweet.parentNode.filter;
+                    if (parent_filter == self) return;
+
+                    // Migrate the member from the old filter to the new filter
+                    var refugees = $.makeArray(parent_filter.remove_member(tweet.member_id));
+                    var more_refugees = $.makeArray(self.add_member(tweet.member_id));
+                    refugees = $.merge(refugees, more_refugees);
+
+                    // Immigrate all the refugees
+                    self.immigrate_tweets(refugees);
+                }
+    });
+}
+
+WhitelistFilter.prototype.passes_filter = function(member_id) {
     return this.members[member_id];
 }
 
-WhitelistFilter.prototype.add_member = function(member_id, tweets) {
-    if(this.members[member_id]) return; // Already present
-    this.members[member_id] = true;
-
+/* Insert a collection of tweets while keeping in mind the appropriate order and limits. */
+WhitelistFilter.prototype.immigrate_tweets = function(tweets) {
+    console.log("Immigrating " + tweets.length + " tweets to " + this.name);
     /// TODO: Should this be part of this.add_tweet?
     // Transplant the tweets list items into the appropriate positions in the timeline for this group.
     var tweet_idx = 0;
@@ -48,25 +73,33 @@ WhitelistFilter.prototype.add_member = function(member_id, tweets) {
 
     // Fill the rest at the end
     for(var i=tweet_idx; i < tweets.length; i++) {
-        $(this.target).append(tweets[i]);
+        $(this.container).append(tweets[i]);
     }
+}
+
+WhitelistFilter.prototype.add_member = function(member_id) {
+    if(this.members[member_id]) return; // Already present
+    console.log("Adding member " + member_id + " to " + this.name);
+    this.members[member_id] = true;
+
+    return $([]);
 }
 
 WhitelistFilter.prototype.remove_member = function(member_id) {
     if(this.members) this.members[member_id] = false;
+    console.log("Removing member " + member_id + " to " + this.name);
 
-    // Remove all items from this.target which are owned by member_id and return their data in a list.
-    return $("li", this.target).filter(function(i) { return this.member_id == member_id; });
+    // Remove all items from this.container which are owned by member_id and return their data in a list.
+    return $("li", this.container).filter(function(i) { return this.member_id == member_id; });
 }
 
-
 WhitelistFilter.prototype.add_tweet = function(tweet) {
-    var tweet_obj = render_tweet(tweet);
-    $(this.target).prepend(tweet_obj);
+    var tweet_obj = this.source.render_msg(tweet);
+    $(this.container).prepend(tweet_obj);
     this.slots_left--;
 
     while(this.slots_left < 0) {
-        $("li:last", this.target).remove();
+        $("li:last", this.container).remove();
         this.slots_left++;
     }
 }
@@ -74,26 +107,27 @@ WhitelistFilter.prototype.add_tweet = function(tweet) {
 /* Check if a tweet belongs in this filter, add it if it does. */
 WhitelistFilter.prototype.inject = function(tweet) {
     var member_id = tweet.user.id;
-    if(this.is_member(member_id)) this.add_tweet(tweet);
+    if(this.passes_filter(member_id)) this.add_tweet(tweet);
 }
 
 
 /*********************************************************************/
 
+/// TODO: Is there a better way to do inheritance?
 
-function BlacklistFilter(name) {
+function BlacklistFilter(name, source) {
     this.name = name;
-    this.members = {};
-
-    this.slots_left = 200;
-    this.container = $('<ul id="' + name + '-filter" />');
+    this.source = source;
+    this.__init__();
 }
 
-BlacklistFilter.prototype.is_member = function(member_id) {
+BlacklistFilter.prototype.passes_filter = function(member_id) {
     return !this.members[member_id];
 }
 
-BlacklistFilter.prototype.add_member = WhitelistFilter.prototype.remove_member;
-BlacklistFilter.prototype.remove_member = Whitelist.prototype.add_member;
+BlacklistFilter.prototype.__init__ = WhitelistFilter.prototype.__init__;
 BlacklistFilter.prototype.add_tweet = WhitelistFilter.prototype.add_tweet;
+BlacklistFilter.prototype.add_member = WhitelistFilter.prototype.add_member;
+BlacklistFilter.prototype.remove_member = WhitelistFilter.prototype.remove_member;
+BlacklistFilter.prototype.immigrate_tweets = WhitelistFilter.prototype.immigrate_tweets;
 BlacklistFilter.prototype.inject = WhitelistFilter.prototype.inject;

@@ -13,7 +13,7 @@ search = function(o, v, i){
 /* Borrowed from http://github.com/peterk/twoot/ */
 function refresh_time() {
     // get all span.time and recalc from title attribute
-    $('span.time').each(function() {
+    $('.tweet span.time').each(function() {
         $(this).text(relative_time($(this).attr("title")));
     })
 }
@@ -43,7 +43,7 @@ function relative_time(time_value) {
 
 function log(msg) {
     var now = new Date();
-    var zero_padding = (now.last_update.getMinutes() < 10) ? "0" : "";
-    var time = this.last_update.getHours() + ":" + zeroPadding + this.last_update.getMinutes();
+    var zero_padding = (now.getMinutes() < 10) ? "0" : "";
+    var time = now.getHours() + ":" + zero_padding + now.getMinutes();
     $("#client_status").html('<span class="time">' + time + '</span> ' + msg);
 }

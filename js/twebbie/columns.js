@@ -1,5 +1,39 @@
 /* columns.js - Twebbie visual columns which render filters. */
 
+function Twebbie() {
+    Twebbie.instance = this; // There can only be one!
+
+    this.columns = [];
+    this.filters = [];
+    this.sources = [];
+
+    var default_source = new TwitterAccount();
+    var default_filter = new BlacklistFilter("Twebbie", default_source); /// TODO: Remove default_source param once tweet data is abstracted in a self-rendering object
+    var default_column = new Column(default_filter);
+
+    this.sources.push(default_source);
+    this.filters.push(default_filter);
+    this.columns.push(default_column);
+
+    // Subscribe each filter to the default source.
+    $.each(this.filters, function(j, filter) {
+        default_source.subscribe_filter(filter);
+    });
+}
+
+Twebbie.prototype.refresh = function() {
+    // Refresh every source
+    $.each(this.sources, function(i, source) { source.refresh(); });
+}
+
+Twebbie.prototype.add_column = function() {
+    var default_filter = new WhitelistFilter("Whitelist Filter", this.sources[0]);
+    var column = new Column(default_filter);
+
+    this.filters.push(default_filter);
+    this.columns.push(column);
+}
+
 function Column(filter) {
     this.filter = filter;
     var title = '<h2 class="ui-helper-reset ui-widget-header ui-corner-all">' + filter.name + '</h2>';
@@ -8,7 +42,7 @@ function Column(filter) {
     this.container.append(title);
     this.container.append(filter.container);
 
-    $("#twebbie").append(container);
+    $("#twebbie").append(this.container);
 }
 
 Column.prototype.change_filter = function(filter) {

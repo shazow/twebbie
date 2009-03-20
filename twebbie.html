@@ -11,6 +11,7 @@
     <script type="text/javascript" src="js/twebbie/utils.js"></script>
     <script type="text/javascript" src="js/twebbie/sources.js"></script>
     <script type="text/javascript" src="js/twebbie/filters.js"></script>
+    <script type="text/javascript" src="js/twebbie/columns.js"></script>
     <style type="text/css">
         body { 
             background: #000;
@@ -20,8 +21,8 @@
         }
         h2 { margin-bottom: 5px !important; text-align: center } // Is there a better way to do this?
         #client_status { font-size: .7em; border: 1px solid; margin: 5px; padding: 5px; clear: both; }
-        .tweet_group { background: #555; border: 1px solid; margin: 5px; padding: 5px; float: left; }
-        ul.tweet_group_list { margin: 0 0 0 0; padding-left: 0em; padding-bottom: 50px; width: 310px; list-style-type: none; }
+        .twebbie-column { background: #555; border: 1px solid; margin: 5px; padding: 5px; float: left; }
+        .twebbie-filter { margin: 0 0 0 0; padding-left: 0em; padding-bottom: 50px; width: 310px; list-style-type: none; }
 
         .tweet_container { margin-bottom: 5px; padding: 5px; }
         .tweet_container:last-child { margin-bottom: 0px; }
@@ -38,24 +39,10 @@
 
 <body> 
     <div class="ui-state-highlight ui-corner-all" style="margin: 5px; padding: 5px;">
-        <span id="client_status"></span>
+        <span id="client_status" />
     </div>
 
-    <div class="container">
-
-        <div class="tweet_group ui-widget-content ui-corner-all">
-            <h2 class="ui-helper-reset ui-widget-header ui-corner-all">Twebbie</h2>
-            </ul>
-            <ul id="group-1" class="tweet_group_list">
-            </ul>
-        </div>
-
-        <div class="tweet_group ui-widget-content ui-corner-all">
-            <h2 class="ui-helper-reset ui-widget-header ui-corner-all">New Group</h2>
-            <ul id="group-2" class="tweet_group_list"></ul>
-        </div>
-
-    </div>
+    <div class="container" id="twebbie" />
 
     <!--
     <div id="message_entry">
@@ -68,18 +55,15 @@
     -->
 
     <script type="text/javascript">
-        var t = new TwitterAccount();
-        var blacklist = BlacklistFilter('Twebbie');
-        var whitelist = BlacklistFilter('New Group');
-        t.subscribe_filter(blacklist);
-        t.subscribe_filter(whitelist);
+        var t = new Twebbie();
+        t.add_column();
 
         /* Refreshing the Twitter API */
-        function refresh_twitter_loop() {
+        function refresh_twebbie_loop() {
             t.refresh();
-            setTimeout("refresh_twitter_loop()", 90000);
+            setTimeout("refresh_twebbie_loop()", 90000);
         }
-        setTimeout("refresh_twitter_loop()", 90000);
+        setTimeout("refresh_twebbie_loop()", 90000);
 
         /* Refreshing the relative time */
         function refresh_time_loop() {
