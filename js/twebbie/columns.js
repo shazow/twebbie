@@ -27,7 +27,9 @@ Twebbie.prototype.refresh = function() {
 }
 
 Twebbie.prototype.add_column = function() {
-    var default_filter = new WhitelistFilter("Whitelist Filter", this.sources[0]);
+    var source = this.sources[0];
+    var default_filter = new WhitelistFilter("Whitelist Filter", source);
+    source.subscribe_filter(default_filter);
     var column = new Column(default_filter);
 
     this.filters.push(default_filter);
