@@ -13,7 +13,7 @@ search = function(o, v, i){
 /* Borrowed from http://github.com/peterk/twoot/ */
 function refresh_time() {
     // get all span.time and recalc from title attribute
-    $('.tweet span.time').each(function() {
+    $('.tweet_container .time').each(function() {
         $(this).text(relative_time($(this).attr("title")));
     })
 }
