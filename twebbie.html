@@ -11,7 +11,7 @@
     <script type="text/javascript" src="js/twebbie/utils.js"></script>
     <script type="text/javascript" src="js/twebbie/sources.js"></script>
     <script type="text/javascript" src="js/twebbie/filters.js"></script>
-    <script type="text/javascript" src="js/twebbie/columns.js"></script>
+    <script type="text/javascript" src="js/twebbie/core.js"></script>
     <style type="text/css">
         body { 
             background: #000;
@@ -34,6 +34,8 @@
         .stalking { background-position:-32px -32px; }
         .mutual { background-position:-160px -32px; }
 
+        #twebbie-add-column { float: right; cursor: pointer; margin: 5px;}
+
     </style>
 </head>
 
@@ -42,7 +44,9 @@
         <span id="client_status" />
     </div>
 
-    <div class="container" id="twebbie" />
+    <div class="container" id="twebbie">
+        <div id="twebbie-add-column" class="ui-state-default ui-corner-all">Add Column<div>
+    </div>
 
     <!--
     <div id="message_entry">

@@ -2,6 +2,7 @@
 
 function Twebbie() {
     Twebbie.instance = this; // There can only be one!
+    var self = this;
 
     this.columns = [];
     this.filters = [];
@@ -18,6 +19,11 @@ function Twebbie() {
     // Subscribe each filter to the default source.
     $.each(this.filters, function(j, filter) {
         default_source.subscribe_filter(filter);
+    });
+
+    // Register UI elements
+    $("#twebbie-add-column").click(function(e) {
+        self.add_column();
     });
 }
 
