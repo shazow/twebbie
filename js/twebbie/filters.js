@@ -6,6 +6,17 @@ TwebbieFilter.prototype = {
     passes_filter: function() {}
 }
 
+TwebbieFilter.prototype.add_tweet = function(tweet) {
+    var tweet_obj = this.source.render_msg(tweet);
+    $(this.container).prepend(tweet_obj);
+    this.slots_left--;
+
+    while(this.slots_left < 0) {
+        $("li:last", this.container).remove();
+        this.slots_left++;
+    }
+}
+
 /*********************************************************************/
 
 function WhitelistFilter(name, source) {
@@ -19,7 +30,7 @@ WhitelistFilter.prototype.__init__ = function() {
 
     this.members = {};
     this.slots_left = 200;
-    this.container = $('<ul id="filter_id-' + name + '" class="twebbie-filter" />');
+    this.container = $('<ul id="filter_id-' + this.name + '" class="twebbie-filter" />');
     this.container[0].filter = self;
 
     this.container.droppable({
@@ -48,7 +59,6 @@ WhitelistFilter.prototype.passes_filter = function(member_id) {
 
 /* Insert a collection of tweets while keeping in mind the appropriate order and limits. */
 WhitelistFilter.prototype.immigrate_tweets = function(tweets) {
-    console.log("Immigrating " + tweets.length + " tweets to " + this.name);
     /// TODO: Should this be part of this.add_tweet?
     // Transplant the tweets list items into the appropriate positions in the timeline for this group.
     var tweet_idx = 0;
@@ -79,7 +89,6 @@ WhitelistFilter.prototype.immigrate_tweets = function(tweets) {
 
 WhitelistFilter.prototype.add_member = function(member_id) {
     if(this.members[member_id]) return; // Already present
-    console.log("Whitelisting member " + member_id + " to " + this.name);
     this.members[member_id] = true;
 
     return $([]);
@@ -87,25 +96,15 @@ WhitelistFilter.prototype.add_member = function(member_id) {
 
 WhitelistFilter.prototype.remove_member = function(member_id) {
     if(this.members) this.members[member_id] = false;
-    console.log("Un-whitelisting member " + member_id + " to " + this.name);
 
     // Remove all items from this.container which are owned by member_id and return their data in a list.
     return $("li", this.container).filter(function(i) { return this.member_id == member_id; });
 }
 
-WhitelistFilter.prototype.add_tweet = function(tweet) {
-    var tweet_obj = this.source.render_msg(tweet);
-    $(this.container).prepend(tweet_obj);
-    this.slots_left--;
-
-    while(this.slots_left < 0) {
-        $("li:last", this.container).remove();
-        this.slots_left++;
-    }
-}
+WhitelistFilter.prototype.add_tweet = TwebbieFilter.prototype.add_tweet;
 
 /* Check if a tweet belongs in this filter, add it if it does. */
-WhitelistFilter.prototype.inject = function(tweet) {
+WhitelistFilter.prototype.notify = function(tweet) {
     var member_id = tweet.user.id;
     if(this.passes_filter(member_id)) this.add_tweet(tweet);
 }
@@ -128,7 +127,6 @@ BlacklistFilter.prototype.passes_filter = function(member_id) {
 /// TODO: This is too similar to WhitelistFilter.add_member... figure out a clever way to merge the code.
 BlacklistFilter.prototype.add_member = function(member_id) {
     if(this.members) this.members[member_id] = false;
-    console.log("Un-blacklisting member " + member_id + " to " + this.name);
 
     return $([]);
 }
@@ -136,7 +134,6 @@ BlacklistFilter.prototype.add_member = function(member_id) {
 /// TODO: This is too similar to WhitelistFilter.remove_member... figure out a clever way to merge the code.
 BlacklistFilter.prototype.remove_member = function(member_id) {
     if(this.members[member_id]) return; // Already present
-    console.log("Blacklisting member " + member_id + " to " + this.name);
     this.members[member_id] = true;
 
     // Remove all items from this.container which are owned by member_id and return their data in a list.
@@ -144,6 +141,6 @@ BlacklistFilter.prototype.remove_member = function(member_id) {
 }
 
 BlacklistFilter.prototype.__init__ = WhitelistFilter.prototype.__init__;
-BlacklistFilter.prototype.add_tweet = WhitelistFilter.prototype.add_tweet;
+BlacklistFilter.prototype.add_tweet = TwebbieFilter.prototype.add_tweet;
 BlacklistFilter.prototype.immigrate_tweets = WhitelistFilter.prototype.immigrate_tweets;
-BlacklistFilter.prototype.inject = WhitelistFilter.prototype.inject;
+BlacklistFilter.prototype.notify = WhitelistFilter.prototype.notify;

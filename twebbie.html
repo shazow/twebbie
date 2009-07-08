@@ -11,6 +11,7 @@
     <script type="text/javascript" src="js/twebbie/utils.js"></script>
     <script type="text/javascript" src="js/twebbie/sources.js"></script>
     <script type="text/javascript" src="js/twebbie/filters.js"></script>
+    <script type="text/javascript" src="js/twebbie/geoloc.js"></script>
     <script type="text/javascript" src="js/twebbie/core.js"></script>
     <style type="text/css">
         body { 
@@ -19,8 +20,7 @@
             font-family:'Lucida Grande',sans-serif;
             font-size:0.75em;
         }
-        h2 { margin-bottom: 5px !important; text-align: center } // Is there a better way to do this?
-        #client_status { font-size: .7em; border: 1px solid; margin: 5px; padding: 5px; clear: both; }
+        h2 { margin-bottom: 5px !important; text-align: center } /* Is there a better way to do this? */
         .twebbie-column { background: #555; border: 1px solid; margin: 5px; padding: 5px; float: left; }
         .twebbie-filter { margin: 0 0 0 0; padding-left: 0em; padding-bottom: 50px; width: 310px; list-style-type: none; }
 
@@ -34,7 +34,8 @@
         .stalking { background-position:-32px -32px; }
         .mutual { background-position:-160px -32px; }
 
-        #twebbie-add-column { float: right; cursor: pointer; margin: 5px;}
+        #twebbie-filter-menu { float: right; }
+        #twebbie-filter-menu div { cursor: pointer; margin: 5px; padding: 2px;}
 
     </style>
 </head>
@@ -45,7 +46,10 @@
     </div>
 
     <div class="container" id="twebbie">
-        <div id="twebbie-add-column" class="ui-state-default ui-corner-all">Add Column<div>
+    </div>
+    <div id="twebbie-filter-menu">
+        <div id="twebbie-add-whitelist" class="ui-state-default ui-corner-all">Whitelist Filter</div>
+        <div id="twebbie-add-geoloc" class="ui-state-default ui-corner-all">Location Filter</div>
     </div>
 
     <!--
@@ -60,7 +64,8 @@
 
     <script type="text/javascript">
         var t = new Twebbie();
-        t.add_column();
+
+        $("#twebbie-add-whitelist").click();
 
         /* Refreshing the Twitter API */
         function refresh_twebbie_loop() {

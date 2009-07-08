@@ -10,7 +10,7 @@ function Twebbie() {
 
     var default_source = new TwitterAccount();
     var default_filter = new BlacklistFilter("Twebbie", default_source); /// TODO: Remove default_source param once tweet data is abstracted in a self-rendering object
-    var default_column = new Column(default_filter);
+    var default_column = new Column("Twebbie", default_filter);
 
     this.sources.push(default_source);
     this.filters.push(default_filter);
@@ -22,8 +22,17 @@ function Twebbie() {
     });
 
     // Register UI elements
-    $("#twebbie-add-column").click(function(e) {
-        self.add_column();
+    $("#twebbie-add-whitelist").click(function(e) {
+        var f = new WhitelistFilter("Whitelist Filter", self.sources[0]);
+        self.add_column("Whitelist", f);
+    });
+
+    $("#twebbie-add-geoloc").click(function(e) {
+        var f = new GeolocFilter("Location Filter", self.sources[0]);
+        var address = prompt("Location address to filter within 200km?");
+        f.set_location(address, function() {
+            self.add_column("Location: " + address, f);
+        });
     });
 }
 
@@ -32,19 +41,18 @@ Twebbie.prototype.refresh = function() {
     $.each(this.sources, function(i, source) { source.refresh(); });
 }
 
-Twebbie.prototype.add_column = function() {
+Twebbie.prototype.add_column = function(name, filter) {
     var source = this.sources[0];
-    var default_filter = new WhitelistFilter("Whitelist Filter", source);
-    source.subscribe_filter(default_filter);
-    var column = new Column(default_filter);
+    source.subscribe_filter(filter);
+    var column = new Column(name, filter);
 
-    this.filters.push(default_filter);
+    this.filters.push(filter);
     this.columns.push(column);
 }
 
-function Column(filter) {
+function Column(name, filter) {
     this.filter = filter;
-    var title = '<h2 class="ui-helper-reset ui-widget-header ui-corner-all">' + filter.name + '</h2>';
+    var title = '<h2 class="ui-helper-reset ui-widget-header ui-corner-all">' + name + '</h2>';
 
     this.container = $('<div class="twebbie-column ui-widget-content ui-corner-all" />');
     this.container.append(title);
@@ -56,4 +64,8 @@ function Column(filter) {
 Column.prototype.change_filter = function(filter) {
     $('.twebbie-filter', this.container).replaceWith(filter.container);
     $('h2', this.container).text(filter.title);
+}
+
+Column.prototype.set_title = function(text) {
+    $("h2", this.container).text(text)
 }

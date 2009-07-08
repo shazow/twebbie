@@ -56,7 +56,7 @@ TwitterAccount.prototype.refresh = function() {
             self.msg_cache.push(tweet);
 
             // Notify each filter of the new tweet
-            $.each(self.filters, function(j, filter) { filter.inject(tweet); });
+            $.each(self.filters, function(j, filter) { filter.notify(tweet); });
         });
     });
     this.last_update = new Date();
@@ -68,7 +68,7 @@ TwitterAccount.prototype.subscribe_filter = function(filter) {
     this.filters.push(filter);
 
     // Populate the filter with cached messages
-    $.each(this.msg_cache, function(i, tweet) { filter.inject(tweet); });
+    $.each(this.msg_cache, function(i, tweet) { filter.notify(tweet); });
 }
 
 TwitterAccount.prototype.load_social_graph = function(callback) {

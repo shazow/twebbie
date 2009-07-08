@@ -47,3 +47,11 @@ function log(msg) {
     var time = now.getHours() + ":" + zero_padding + now.getMinutes();
     $("#client_status").html('<span class="time">' + time + '</span> ' + msg);
 }
+
+Number.prototype.toRad = function() {  // convert degrees to radians
+  return this * Math.PI / 180;
+}
+
+Number.prototype.toDeg = function() {  // convert radians to degrees (signed)
+  return this * 180 / Math.PI;
+}
