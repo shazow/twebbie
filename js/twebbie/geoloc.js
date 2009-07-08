@@ -50,7 +50,7 @@ GeolocFilter.prototype.add_tweet = TwebbieFilter.prototype.add_tweet;
 var get_lnglat_disable_until = new Date();
 
 function get_lnglat(address, callback) {
-    if(address.length==0) return;
+    if(!address || address.length==0) return;
 
     // TODO: Parse iPhone: x,y coords
     if(geoloc_cache[address]) {
