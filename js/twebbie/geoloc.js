@@ -71,7 +71,7 @@ function get_lnglat(address, callback) {
             if(data.Status.code == 620) {
                 // Google is angry, back off.
                 log("Google is angry, backing off.");
-                get_lnglat_disable_until.setTime(get_lnglat_disable_until.getTime() + 60 * 5 * 100);
+                get_lnglat_disable_until.setTime(get_lnglat_disable_until.getTime() + 60 * 1 * 100);
             }
             return; // Fail
         }
