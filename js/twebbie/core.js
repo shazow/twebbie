@@ -30,9 +30,8 @@ function Twebbie() {
     $("#twebbie-add-geoloc").click(function(e) {
         var f = new GeolocFilter("Location Filter", self.sources[0]);
         var address = prompt("Location address to filter within 200km?");
-        f.set_location(address, function() {
-            self.add_column("Location: " + address, f);
-        });
+        self.add_column("Location: " + address, f);
+        f.set_location(address, function() {});
     });
 }
 

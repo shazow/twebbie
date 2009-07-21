@@ -40,7 +40,7 @@ TwitterAccount.prototype.seconds_since_refresh = function() {
 TwitterAccount.prototype.refresh = function() {
     if (this.seconds_since_refresh() < this.max_refresh_rate) return;
 
-    var target_url = "http://twitter.com/statuses/friends_timeline.json?callback=?";
+    var target_url = "https://twitter.com/statuses/friends_timeline.json?callback=?";
     if (this.last_update) target_url += "&since=" + this.last_update.toGMTString();
 
     var self = this;
@@ -75,11 +75,11 @@ TwitterAccount.prototype.load_social_graph = function(callback) {
     var self = this;
 
     // Load following
-    $.getJSON("http://twitter.com/friends/ids.json?callback=?", function(data) {
+    $.getJSON("https://twitter.com/friends/ids.json?callback=?", function(data) {
         $.each(data, function(i, member_id) { self.following[member_id] = true; });
 
         // Load followers
-        $.getJSON("http://twitter.com/followers/ids.json?callback=?", function(data) {
+        $.getJSON("https://twitter.com/followers/ids.json?callback=?", function(data) {
             $.each(data, function(i, member_id) { self.followers[member_id] = true; });
 
             // Run callback

@@ -48,6 +48,10 @@ function log(msg) {
     $("#client_status").html('<span class="time">' + time + '</span> ' + msg);
 }
 
+function debug(msg) {
+    if(console) console.log(msg);
+}
+
 Number.prototype.toRad = function() {  // convert degrees to radians
   return this * Math.PI / 180;
 }
