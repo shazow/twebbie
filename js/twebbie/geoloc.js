@@ -9,10 +9,17 @@ function GoogleGeocoder(API_KEY) {
     this.disabled_until = new Date();
     this.request_interval = 1000; // Time (in milliseconds) between queries
     this.throttle_interval = 1000 * 60; // Time (in milliseconds) to wait when the API gets angry
+    this.last_hit_cached = false;
 }
 
 GoogleGeocoder.prototype.delay_until = function() {
     var now = new Date();
+
+    if(this.last_hit_cached) {
+        this.last_hit_cached = false;
+        return new Date(Math.max(now, this.disable_until));
+    }
+
     var until = ( this.disable_until > now ) ? this.disable_until : now;
     until = now.setTime(until.getTime() + this.request_interval);
     return new Date(until);
@@ -20,16 +27,24 @@ GoogleGeocoder.prototype.delay_until = function() {
 
 GoogleGeocoder.prototype.delay_for = function() {
     /* Number of milliseconds to delay for. */
-    return this.delay_until().getTime() - (new Date()).getTime();
+    return Math.max(1, this.delay_until().getTime() - (new Date()).getTime());
 }
 
 GoogleGeocoder.prototype.set_throttle_delay = function() {
-    this.disable_until = (new Date()).getTime() + this.throttle_interval;
+    this.disable_until = new Date((new Date()).getTime() + this.throttle_interval);
 }
 
 GoogleGeocoder.prototype.set_cache = function(key, value) {
-    debug("GoogleGeocoder cache: " + key + " => " + value);
     this.cache[key] = value;
+}
+
+GoogleGeocoder.prototype.get_cache = function(key) {
+    var value = this.cache[key];
+    if(value) {
+        debug("GoogleGeocoder cached hit: " + key);
+        this.last_hit_cached = true;
+        return value;
+    }
 }
 
 GoogleGeocoder.prototype._process_queue = function() {
@@ -38,6 +53,10 @@ GoogleGeocoder.prototype._process_queue = function() {
     var item = this.queue.pop();
     var address = item[0];
     var callback = item[1];
+
+    // Check cache
+    var coords = this.get_cache(address);
+    if(coords) return callback(coords);
 
     var target_url = "http://maps.google.com/maps/geo?q=" + escape(address) +"&output=json&oe=utf8&sensor=false&key=" + this.API_KEY + "&callback=?";
 
@@ -63,16 +82,18 @@ GoogleGeocoder.prototype._process_queue = function() {
 
 GoogleGeocoder.prototype.process_queue = function() {
     var r = this._process_queue();
-    setTimeout("Geocoder.process_queue()", this.delay_for());
+    var delay = this.delay_for();
+    setTimeout("Geocoder.process_queue()", delay);
     return r;
 }
 
 GoogleGeocoder.prototype.geocode = function(address, callback) {
-    if(address.length==0) return;
+    if(!address || address.length==0) return;
     // TODO: Parse iPhone: x,y coords
 
     // Check cache
-    if(this.cache[address]) return callback(this.cache[address]);
+    var coords = this.get_cache(address);
+    if(coords) return callback(coords);
 
     // Shove it into the queue
     this.queue.push([address, callback]);
@@ -97,7 +118,7 @@ GeolocFilter.prototype.__init__ = function() {
     this.geocoder = Geocoder;
 
     this.coords = [0, 0]; // Longitude, latitude
-    this.radius = 200; // In km
+    this.radius = 300; // In km
 
     this.slots_left = 200;
     this.container = $('<ul id="filter_id-' + this.name + '" class="twebbie-filter" />');
@@ -105,10 +126,12 @@ GeolocFilter.prototype.__init__ = function() {
 }
 
 GeolocFilter.prototype.passes_filter = function(address, callback) {
+    if(!address) return false;
+
     var self = this;
     this.geocoder.geocode(address, function(r) {
         var d = distance_between(self.coords, r);
-        debug("GeolocFilter.passes_filter: distance(" + address +") = " + d);
+        log("Geocoded: " + address +", distance: " + d);
         if(d <= self.radius) callback();
     });
 }
@@ -130,42 +153,6 @@ GeolocFilter.prototype.notify = function(tweet) {
 }
 
 GeolocFilter.prototype.add_tweet = TwebbieFilter.prototype.add_tweet;
-
-var get_lnglat_disable_until = new Date();
-
-function get_lnglat(address, callback) {
-    if(!address || address.length==0) return;
-
-    // TODO: Parse iPhone: x,y coords
-    if(geoloc_cache[address]) {
-        return callback(geoloc_cache[address]);
-    }
-
-    if(get_lnglat_disable_until > (new Date())) {
-        log("Google is still angry, not touching geoloc for: " + address);
-        return;
-    }
-
-    var target_url = "http://maps.google.com/maps/geo?q=" + escape(address) +"&output=json&oe=utf8&sensor=false&callback=?";
-
-    $.getJSON(target_url, function(data) {
-        if(data.Status.code != 200 || !data.Placemark) {
-            geoloc_cache[address] = [0, 0];
-
-            if(data.Status.code == 620) {
-                // Google is angry, back off.
-                log("Google is angry, backing off.");
-                get_lnglat_disable_until.setTime(get_lnglat_disable_until.getTime() + 60 * 1 * 100);
-            }
-            return; // Fail
-        }
-
-        var coords = data['Placemark'][0]['Point']['coordinates'];
-        var r = [coords[0], coords[1]];
-        geoloc_cache[address] = r;
-        callback(r);
-    });
-}
 
 /** Utility functions **/
 
