@@ -131,6 +131,41 @@ GeolocFilter.prototype.notify = function(tweet) {
 
 GeolocFilter.prototype.add_tweet = TwebbieFilter.prototype.add_tweet;
 
+var get_lnglat_disable_until = new Date();
+
+function get_lnglat(address, callback) {
+    if(!address || address.length==0) return;
+
+    // TODO: Parse iPhone: x,y coords
+    if(geoloc_cache[address]) {
+        return callback(geoloc_cache[address]);
+    }
+
+    if(get_lnglat_disable_until > (new Date())) {
+        log("Google is still angry, not touching geoloc for: " + address);
+        return;
+    }
+
+    var target_url = "http://maps.google.com/maps/geo?q=" + escape(address) +"&output=json&oe=utf8&sensor=false&callback=?";
+
+    $.getJSON(target_url, function(data) {
+        if(data.Status.code != 200 || !data.Placemark) {
+            geoloc_cache[address] = [0, 0];
+
+            if(data.Status.code == 620) {
+                // Google is angry, back off.
+                log("Google is angry, backing off.");
+                get_lnglat_disable_until.setTime(get_lnglat_disable_until.getTime() + 60 * 1 * 100);
+            }
+            return; // Fail
+        }
+
+        var coords = data['Placemark'][0]['Point']['coordinates'];
+        var r = [coords[0], coords[1]];
+        geoloc_cache[address] = r;
+        callback(r);
+    });
+}
 
 /** Utility functions **/
 
