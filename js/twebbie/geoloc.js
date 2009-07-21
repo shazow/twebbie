@@ -130,6 +130,7 @@ GeolocFilter.prototype.passes_filter = function(address, callback) {
 
     var self = this;
     this.geocoder.geocode(address, function(r) {
+        if(r[0] == 0 && r[1] == 0) return; // Skip it
         var d = distance_between(self.coords, r);
         log("Geocoded: " + address +", distance: " + d);
         if(d <= self.radius) callback();
